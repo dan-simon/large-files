@@ -10,6 +10,24 @@ function formatInt (x) {
   return (new ADNotations.ScientificNotation()).format(x, 3, 0);
 }
 
+function maybeAddInitialZero(x, maybeDo) {
+  if (x.length === 1 && maybeDo) {
+    return '0' + x;
+  } else {
+    return x;
+  }
+}
+
+
+function formatTime(time) {
+  let parts = [Math.floor(time / 86400), Math.floor(time / 3600) % 24, Math.floor(time / 60) % 60, Math.floor(time) % 60];
+  while (parts[0] === 0) {
+    parts.shift();
+  }
+  let f = (x, i) => maybeAddInitialZero(x.toString(), i !== 0);
+  return parts.map(f).join(':');
+}
+
 let p = function (x) {
   return (x.endsWith('P') || x.endsWith('power')) ? x : (x.endsWith('y') ? x.slice(0, -1) + 'ies' : x + 's');
 }
@@ -37,7 +55,7 @@ let f = function (save, saveNumber) {
   conds = conds.map((_, i, l) => l.slice(i).some(x => x));
   let words = ['star', 'prestige power', 'infinity', 'IP', 'eternity', 'EP', 'complexity', 'ℂP', 'finality', 'FP'];
   let ints = [false, false, true, true, true, true, true, true, true, true];
-  return 'Save ' + saveNumber + ', with ' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
+  return 'Save ' + saveNumber + ', ' + formatTime(o.stats.timeSinceGameStart) + ', with ' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
     i => conds[i]
   ).map(
     i => getFormatter(ints[i])(results[i]) + ' ' + (Decimal.eq(results[i], 1) ? words[i] : p(words[i]))
